@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de Comparendos</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="mb-4">Crear Mapa de Comparendos</h1>
+        <form id="form" class="needs-validation" novalidate>
+            <div class="form-group">
+                <label for="file">Seleccionar archivo estándar SIMIT 05212000comp.txt:</label>
+                <input type="file" class="form-control-file" id="file" name="file" accept=".csv,.txt" required>
+                <div class="invalid-feedback">
+                    Por favor, selecciona un archivo.
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="start-date">Fecha inicial:</label>
+                        <input type="date" class="form-control" id="start-date" name="start-date" required>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="end-date">Fecha final:</label>
+                        <input type="date" class="form-control" id="end-date" name="end-date" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="infraccion">Seleccionar Código de Infracción (opcional):</label>
+                <select id="infraccion" name="infraccion" class="form-control">
+                    <option value="">Todas las infracciones</option>
+                    <option value="A01">A01: NO TRANSITAR POR LA DERECHA DE LA VIA</option>
+                    <option value="A02">A02: AGARRARSE DE OTRO VEHICULO EN MOVIMIENTO</option>
+                    <option value="A03">A03: TRANSPORTAR PERSONAS O COSAS QUE DISMINUYAN SU VISIBILIDAD E INCOMODEN LA CONDUCCION</option>
+                    <option value="A04">A04: TRANSITAR POR ANDENES, ACERAS, PUENTES O DEMAS LUGARES DE USO EXCLUSIVO PARA EL TRANSITO DE PEATONES</option>
+                    <option value="A05">A05: NO RESPETAR LAS SEÑALES DE TRANSITO</option>
+                    <option value="A06">A06: TRANSITAR SIN LOS DISPOSITIVOS LUMINOSOS REQUERIDOS</option>
+                    <option value="A07">A07: TRANSITAR SIN DISPOSITIVOS QUE PERMITAN LA PARADA INMEDIATA O CON ELLOS PERO EN ESTADO DEFECTUOSO</option>
+                    <option value="A08">A08: TRANSITAR POR ZONAS PROHIBIDAS O POR AQUELLAS VIAS EN DONDE LAS AUTORIDADES COMPETENTES LO PROHIBAN O, CONDUCIR POR VIAS DIFERENTES A AQUELLAS ESPECIALMENTE DISEÑADAS PARA ELLOS CUANDO LAS HUBIERE.</option>
+                    <option value="A09">A09: ADELANTAR ENTRE DOS (2) VEHICULOS AUTOMOTORES QUE ESTEN EN SUS RESPECTIVOS CARRILES.</option>
+                    <option value="A10">A10: CONDUCIR POR LA VIA FERREA O POR ZONAS DE PROTECCION Y SEGURIDAD</option>
+                    <option value="A11">A11: TRANSITAR POR ZONAS RESTRINGIDAS O POR VIAS DE ALTA VELOCIDAD COMO AUTOPISTAS Y ARTERIAS, EN ESTE CASO EL VEHICULO NO AUTOMOTOR SERA INMOVILIZADO</option>
+                    <option value="A12">A12: PRESTAR SERVICIO PUBLICO CON ESTE TIPO DE VEHICULOS ADEMAS, EL VEHICULO SERA INMOVILIZADO POR PRIMERA VEZ, POR EL TERMINO DE CINCO DIAS, POR SEGUNDA VEZ VEINTE DÌAS Y POR TERCERA VEZ CUARENTA DIAS</option>
+                    <option value="B01">B01: CONDUCIR UN VEHICULO SIN LLEVAR CONSIGO LA LICENCIA DE CONDUCCION</option>
+                    <option value="B02">B02: CONDUCIR UN VEHICULO CON LA LICENCIA DE CONDUCCION VENCIDA, DE ACUERDO A LOS SIGUIENTES CASOS A) EL CONDUCTOR DE SERVICIO PUBLICO QUE NO REFRENDE SU LICENCIA DE CONDUCCION CADA TRES (3) AÑOS B) EL CON</option>
+                    <option value="B03">B03: CONDUCIR UN VEHICULO SIN PLACAS, NO PORTARLAS EN EL EXTREMO DELANTERO O TRASERO, PORTARLAS CON OBSTACULOS O EN CONDICIONES QUE DIFICULTEN SU PLENA IDENTIFICACION, PORTAR EN EL LUGAR DESTINADO A LAS PL</option>
+                    <option value="B04">B04: CONDUCIR UN VEHICULO CON PLACAS ADULTERADAS, RETOCADAS O ALTERADAS</option>
+                    <option value="B05">B05: CONDUCIR UN VEHICULO CON UNA SOLA PLACA, O SIN EL PERMISO VIGENTE EXPEDIDO POR AUTORIDAD DE TRANSITO</option>
+                    <option value="B06">B06: CONDUCIR UN VEHICULO CON PLACAS FALSAS. EN LOS CASOS B1,B2,B3, B4, B5 Y B6 LOS VEHICULOS SERAN INMOVILIZADOS,</option>
+                    <option value="B07">B07: NO INFORMAR A LA AUTORIDAD DE TRANSITO COMPETENTE EL CAMBIO DE MOTOR O COLOR DE UN VEHICULO. EN AMBOS CASOS, EL VEHICULO SERA INMOVILIZADO</option>
+                    <option value="B08">B08: NO PAGAR EL PEAJE EN LOS SITIOS ESTABLECIDOS.</option>
+                    <option value="B09">B09: UTILIZAR EQUIPOS DE SONIDO A VOLUMENES QUE INCOMODEN A LOS PASAJEROS DE UN VEHICULO DE SERVICIO PUBLICO</option>
+                    <option value="B10">B10: CONDUCIR UN VEHICULO CON VIDRIOS POLARIZADOS, ENTINTADOS U OSCURECIDOS, SIN PORTAR EL PERMISO RESPECTIVO, DE ACUERDO A LA REGLAMENTACION EXISTENTE SOBRE LA MATERIA O, NO LLEVAR EL VEHICULO DE SERVICIO</option>
+                    <option value="B11">B11: CONDUCIR UN VEHICULO CON PROPAGANDA, PUBLICIDAD O ADHESIVOS EN SUS VIDRIOS QUE OBSTACULICEN LA VISIBILIDAD</option>
+                    <option value="B12">B12: NO RESPETAR LAS NORMAS ESTABLECIDAS POR LA AUTORIDAD COMPETENTE PARA EL TRANSITO DE CORTEJOS FUNEBRES.</option>
+                    <option value="B13">B13: NO RESPETAR LAS FORMACIONES DE TROPAS,LA MARCHA DE DESFILES,PROCESIONES, ENTIERROS, FILAS ESTUDIANTILES, Y LAS MANIFESTACIONES PUBLICAS Y ACTIVIDADES DEPORTIVAS, DEBIDAMENTE AUTORIZADAS POR LAS AUTORI</option>
+                    <option value="B14">B14: REMOLCAR OTRO VEHICULO VIOLANDO LO DISPUESTO POR ESTE CODIGO, ASI: A) REMOLCAR UN VEHICULO CON OTRO VEHICULO EN ZONA URBANA EN CIRCUNSTANCIA DIFERENTE A DESPEJAR LA VIA. B) REMOLCAR UN VEHICULO CON OT</option>
+                    <option value="B15">B15: CONDUCIR UN VEHICULO DE SERVICIO PUBLICO QUE NO LLEVE EL AVISO DE TARIFAS OFICIALES EN CONDICIONES DE FACIL LECTURA PARA LOS PASAJEROS O POSEER ESTE AVISO DETERIORADO O ADULTERADO.</option>
+                    <option value="B16">B16: PERMITIR QUE EN UN VEHICULO DE SERVICIO PUBLICO PARA TRANSPORTE DE PASAJEROS SE LLEVEN ANIMALES U OBJETOS QUE INCOMODEN A LOS PASAJEROS. NO LLEVAR EL EQUIPAJE DE LOS PASAJEROS EN LA BODEGA, BAUL O PAR</option>
+                    <option value="B17">B17: ABANDONAR UN VEHICULO DE SERVICIO PUBLICO CON PASAJEROS.</option>
+                    <option value="B18">B18: NO TRANSITAR POR EL CARRIL DERECHO EL VEHICULO DE TRANSPORTE PUBLICO INDIVIDUAL, CUANDO TRANSITA SIN PASAJEROS INDICANDO LA DISPONIBILIDAD PARA PRESTAR EL SERVICIO, MEDIANTE LUZ ESPECIAL O LA SEÑAL LU</option>
+                    <option value="B19">B19: REALIZAR EL CARGUE O DESCARGUE DE UN VEHICULO EN SITIOS Y HORAS PROHIBIDAS POR LAS AUTORIDADES COMPETENTES, DE ACUERDO CON LO ESTABLECIDO EN LAS NORMAS CORRESPONDIENTES.</option>
+                    <option value="B20">B20: TRANSPORTAR CARNE, PESCADO O ALIMENTOS FACILMENTE CORRUPTIBLES, EN VEHICULOS QUE NO CUMPLAN LAS CONDICIONES FIJADAS POR EL MINISTERIO DE TRANSPORTE.</option>
+                    <option value="B21">B21: LAVAR VEHICULOS EN VIA PUBLICA, EN RIOS, EN CANALES Y EN QUEBRADAS.</option>
+                    <option value="B22">B22: LLEVAR NIÑOS MENORES DE DIEZ (10) AÑOS EN EL ASIENTO DELANTERO.</option>
+                    <option value="B23">B23: UTILIZAR RADIOS, EQUIPOS DE SONIDO O DE AMPLIFICACION A VOLUMENES QUE SUPEREN LOS DECIBELES MAXIMOS ESTABLECIDOS POR LAS AUTORIDADES AMBIENTALES. DE IGUAL FORMA UTILIZAR PANTALLAS, PROYECTORES DE IMAG</option>
+                    <option value="C01">C01: PRESENTAR LICENCIA DE CONDUCCION ADULTERADA O AJENA, LO CUAL DARA LUGAR A LA INMOVILIZACION DEL VEHICULO.</option>
+                    <option value="C02">C02:  ESTACIONAR UN VEHICULO EN LOS SIGUIENTES SITIOS PROHIBIDOS: A) SOBRE ANDENES, ZONAS VERDES O SOBRE ESPACIO PUBLICO DESTINADO PARA PEATONES, RECREACION O CONSERVACION. B) EN VIAS ARTERIAS, AUTOPISTAS,</option>
+                    <option value="C03">C03: BLOQUEAR UNA CALZADA O INTERSECCION CON UN VEHICULO, SALVO CUANDO EL BLOQUEO OBEDEZCA A LA OCURRENCIA DE UN ACCIDENTE DE TRANSITO.</option>
+                    <option value="C04">C04: ESTACIONAR UN VEHICULO SIN TOMAR LAS SIGUIENTES PRECAUCIONES: A) EN VIAS URBANAS DONDE ESTA PERMITIDO EL ESTACIONAMIENTO, NO REALIZARSE LO MAS CERCANO POSIBLE AL ANDEN O AL LIMITE LATERAL DE LA CALZAD</option>
+                    <option value="C05">C05: NO REDUCIR LA VELOCIDAD A TREINTA (30) KILOMETROS POR HORA EN LOS SIGUIENTES CASOS: A) EN LUGARES DE CONCENTRACION DE PERSONAS Y EN ZONAS RESIDENCIALES. B) EN LAS ZONAS ESCOLARES DE LOS HORARIOS Y DIA</option>
+                    <option value="C06">C06: NO UTILIZAR EL CINTURON DE SEGURIDAD POR PARTE DE LOS OCUPANTES DEL VEHICULO Y LOS CINTURONES DE SEGURIDAD EN LOS ASIENTOS TRASEROS EN LOS VEHICULOS FABRICADOS A PARTIR DEL AÑO 2004.</option>
+                    <option value="C07">C07: DEJAR DE SEÑALIZAR: A) CON LAS LUCES DIRECCIONALES  LA MANIOBRA DE GIRO O DE CAMBIO DE CARRIL. B) MEDIANTE SEÑALES MANUALES, SOLO EN CASO DE EMERGENCIA, Y ANTE LA IMPOSIBILIDAD DE UTILIZAR LAS SEÑALES</option>
+                    <option value="C08">C08: TRANSITAR SIN LOS DISPOSITIVOS LUMINOSOS REQUERIDOS NO LLEVAR LOS VEHICULOS DE SERVICIO PUBLICO Y OFICIAL, UN AVISO VISIBLE TANTO EN EL INTERIOR COMO EN EL EXTERIOR EN EL QUE SE SEÑALE EL NUMERO TELEF</option>
+                    <option value="C09">C09: NO RESPETAR LAS SEÑALES DE DETENCION EN EL CRUCE DE UNA LINEA FERREA A UNA DISTANCIA MINIMA DE CINCO (5) METROS DE LA VIA FERREA O CONDUCIR POR LA VIA FERREA O POR LAS ZONAS DE PROTECCION Y SEGURIDAD</option>
+                    <option value="C10">C10: CONDUCIR UN VEHICULO CON UNA O VARIAS PUERTAS ABIERTAS.</option>
+                    <option value="C11">C11: NO PORTAR COMO MINIMO EL SIGUIENTE EQUIPO DE PREVENCION Y SEGURIDAD: A) UN GATO CON CAPACIDAD PARA ELEVAR EL VEHICULO. B) LA CRUCETA. C) DOS SEÑALES DE CARRETERA EN FORMA DE TRIANGULO EN MATERIAL REFL</option>
+                    <option value="C12">C12: PROVEER DE COMBUSTIBLE UN VEHICULO AUTOMOTOR CON EL MOTOR ENCENDIDO, CON PASAJEROS A BORDO CUANO EL VEHICULO ES DE SERVICIO PUBLICO DE RADIO DE ACCION NACIONAL, TRANSPORTE ESPECIAL Y ESCOLAR O PROVEER</option>
+                    <option value="C13">C13: CONDUCIR UN VEHICULO AUTOMOTOR SIN LAS ADAPTACIONES PERTINENTES, CUADNO EL CONDUCTOR PADECE DE LIMITACION FISICA.</option>
+                    <option value="C14">C14: TRANSITAR POR LOS SIGUIENTES SITIOS RESTRINGIDOS O EN HORAS PROHIBIDAS POR LA AUTORIDAD COMPETENTE. ADEMAS, EL VEHICULO SERA INMOVILIZADO: A) POR LA ZONA DE SEGURIDAD Y PROTECCION DE LA VIA FERREA. B)</option>
+                    <option value="C15">C15: CONDUCIR UN VEHICULO, PARTICULAR O DE SERVICIO PUBLICO, EXCEDIENDO LA CAPACIDAD AUTORIZADA EN LA LICENCIA DE TRANSITO O TARJETA DE OPERACION.</option>
+                    <option value="C16">C16: CONDUCIR UN VEHICULO, ESCOLAR SIN EL PERMISO RESPECTIVO O LOS DISTINTIVOS REGLAMENTARIOS, ESTO ES, NO LLEVAR LOS COLORES VERDES Y/O BLANCO DISTRIBUIDOS A LO LARGO Y ANCHO DE LA CARROCERIA EN LA PARTE</option>
+                    <option value="C17">C17: CIRCULAR CON COMBINACIONES DE VEHICULOS DE DOS (2) O MAS UNIDADES REMOLCADAS, SIN AUTORIZACION ESPECIAL DE AUTORIDAD COMPETENTE.</option>
+                    <option value="C18">C18: CONDUCIR UN VEHICULO AUTORIZADO PARA PRESTAR SERVICIO PUBLICO CON EL TAXIMETRO DAÑADO, CON LOS SELLOS ROTOS O ETIQUETAS ADHESIVAS CON CALIBRACION VENCIDA O ADULTERADASO CUANDO SE CAREZCA DE EL, O CUAN</option>
+                    <option value="C19">C19: DEJAR O RECOGER PASAJEROS EN SITIOS DISTINTOSDE LOS DEMARCADOS POR LAS AUTORIDADES, AL COSTADO DERECHO DE LA VIA, SALVO EN PARADEROS ESPECIALES DE VIAS TRONCALES QUE SEAN DISEÑADAS Y OPERADAS CON DEST</option>
+                    <option value="C20">C20: CONDUCIR UN VEHICULO DE CARGA EN QUE SE TRANSPORTEN MATERIALES DE CONSTRUCCION O A GRANEL SIN LAS MEDIDAS DE PROTECCION, HIGIENE Y SEGURIDAD ORDENADAS QUE NO ESTE DEBIDAMENTE EMPACADA, ROTULADA,EMBALA</option>
+                    <option value="C21">C21: NO ASEGURAR LA CARGA PARA EVITAR QUE SE CAIGAN EN LA VIA LAS COSAS TRANSPORTADAS. ADEMAS, SE INMOVILIZARA EL VEHICULO HASTA TANTO SE REMEDIE LA SITUACION.</option>
+                    <option value="C22">C22: TRANSPORTAR CARGA DE DIMENSIONES SUPERIORES A LAS AUTORIZADAS SIN CUMPLIR CON LOS REQUISITOS EXIGIDOS. ADEMAS, EL VEHICULO SERA INMOVILIZADO HASTA QUE SE REMEDIE DICHA SITUACION.</option>
+                    <option value="C23">C23: IMPARTIR EN VIAS PUBLICAS AL PUBLICO ENSEÑANZA PRACTICA PARA CONDUCIR, SIN ESTAR AUTORIZADO PARA ELLO.</option>
+                    <option value="C24">C24: CONDUCIR MOTOCICLETA SIN OBSERVAR LAS SIGUIENTES NORMAS: A) TRANSITAR OCUPANDO UN CARRIL, OBSERVANDO LO DISPUESTO EN LOS ARTICULOS 60 Y 68 DEL PRESENTE CODIGO, ASI: 1. OCUPAR EL CARRIL DENTRO DE LAS</option>
+                    <option value="C25">C25: TRANSITAR SIN ATENDER ALGUNA DE LAS SIGUIENTES REGLAS: A) CUANDO HUBIERE MAS DE UN CARRIL, POR EL CARRIL IZQUIERDO DE LA VIA A VELOCIDAD QUE ENTORPEZCA EL TRANSITO DE LOS DEMAS VEHICULOS. B) EN UNA VI</option>
+                    <option value="C26">C26: TRANSITAR EN VEHICULOS DE 3,5 O MAS TONELADAS POR EL CARRIL IZQUIERDO DE LA VIA CUANDO HUBIERA MAS DE UN CARRIL</option>
+                    <option value="C27">C27: CONDUCIR UN VEHICULO CUYA CARGA O PASAJEROS OBSTRUYAN LA VISIBILIDAD DEL CONDUCTOR HACIA EL FRENTE, ATRAS O COSTADOS, O IMPIDAN EL CONTROL SOBRE EL SISTEMA DE DIRECCION, FRENOS O SEGURIDAD. ADEMAS EL</option>
+                    <option value="C28">C28: HACER USO DE SIRENAS, LUCES INTERMITENTES, O DE ALTA INTENSIDAD Y APARATOS SIMILARES LOS CUALES ESTÁN RESERVADOS A LOS VEHÍCULOS DE BOMBEROS, AMBULANCIAS, RECOLECTORES DE BASURA, SOCORRO, EMERGENCIA,</option>
+                    <option value="C29">C29: CONDUCIR UN VEHICULO A VELOCIDAD SUPERIOR A LA MAXIMA PERMITIDA, LA CUAL DEBERA ESTAR SEÑALIZADA EN FORMA SECTORIZADA, NO OBSTANTE ESTA NO PODRA SER SUPERIOR A: A) EN VIAS URBANAS DEL DISTRITO O MUNI</option>
+                    <option value="C30">C30: NO ATENDER UNA SEÑAL DE CEDA EL PASO.</option>
+                    <option value="C31">C31: NO ACATAR LAS SEÑALES DE TRANSITO O REQUERIMIENTOS IMPARTIDOS POR LOS AGENTES DE TRANSITO.</option>
+                    <option value="C32">C32: NO RESPETAR EL PASO DE PEATONES QUE CRUZA UNA VIA EN SENTIDO PERMITIDO PARA ELLOS O NO DARLES LA PRELACION EN LAS FRANJAS PARA ELLO ESTABLECIDAS.</option>
+                    <option value="C33">C33: PONER UN VEHICULO EN MARCHA SIN LAS PRECAUCIONES PARA EVITAR CHOQUES.</option>
+                    <option value="C34">C34: REPARAR UN VEHICULO EN LAS VIAS PUBLICAS, PARQUE O ACERA, O HACERLO EN CASO DE EMERGENCIA, SIN ATENDER EL PROCEDIMIENTO SEÑALADO EN ESTE CODIGO. O REPARAR VEHICULOS AUTOMOTORES EN LA ZONA DE SEGURIDAD</option>
+                    <option value="C35">C35: NO REALIZAR LA REVISION TECNICOMECANICA Y DE EMISIONES CONTAMINANTES EN LOS SIGUIENTES PLAZOS O CUANDO AUN PORTANDO LOS CERTIFICADOS CORRESPONDIENTES NO CUENTAN CON LAS SIGUIENTES CONDICIONES TECNICOM</option>
+                    <option value="C36">C36: TRANSPORTAR CARGA EN CONTENEDORES SIN LOS DISPOSITIVOS ESPECIALES DE SUJECION. EL VEHICULO SERA INMOVILIZADO.</option>
+                    <option value="C37">C37: TRANSPORTAR PASAJEROS EN EL PLATON DE UNA CAMIONETA PICO O EN LA PLATAFORMA DE UN VEHICULO DE CARGA, TRATESE DE FURGON O PLATAFORMA DE ESTACAS.</option>
+                    <option value="C38">C38: USAR SISTEMAS MOVILES DE COMUNICACION O TELEFONOS INSTALADOS EN LOS VEHICULOS AL MOMENTO DE CONDUCIR, EXCEPTUANDO SI ESTOS SON UTILIZADOS CON ACCESORIOS O EQUIPOS AUXILIARES QUE PERMITAN TENER LAS MAN</option>
+                    <option value="C39">C39: VULNERAR LAS SIGUIENTES REGLAS DE ESTACIONAMIENTO CONTENIDAS EN EL ARTICULO 77 DE ESTE CODIGO. EN AUTOPISTAS Y ZONAS RURALES, LOS VEHICULOS PODRAN ESTACIONARSE UNICAMENTE POR FUERA DE LA VIA COLOCANDO</option>
+                    <option value="D01">D01: GUIAR UN VEHICULO SIN HABER OBTENIDO LA LICENCIA DE CONDUCCION  CORRESPONDIENTE. ADEMAS, EL VEHICULO SERA INMOBILIZADO EN EL LUGAR DE LOS HECHOS, HASTA QUE ESTE SEA RETIRADO POR UNA PERSONA AUTORIZADA</option>
+                    <option value="D02">D02: CONDUCIR SIN PORTAR EL SEGURO OBLIGATORIO DE ACCIDENTES DE TRANSITO ORDENADO POR LA LEY. ADEMAS, EL VEHICULO SERA INMOVILIZADO.</option>
+                    <option value="D03">D03: TRANSITAR EN SENTIDO CONTRARIO AL ESTIPULADO PARA LA VIA, CALZADA O CARRIL. EN EL CASO DE MOTOCICLETAS SE PROCEDERA A SU INMOVILIZACION HASTA TANTO NO SE PAGUE EL VALOR DE LA MULTA O LA AUTORIDAD COMP</option>
+                    <option value="D04">D04: NO DETENERSE ANTE UNA LUZ ROJA O AMARILLA DE SEMAFORO, UNA SEÑAL DE PARE O UN SEMAFORO INTERMITENTE EN ROJO. EN EL CASO DE MOTOCICLETAS SE PROCEDERA A SU INMOVILIZACION HASTA TANTO NO SE PAGUE EL VALO</option>
+                    <option value="D05">D05: CONDUCIR UN VEHICULO SOBRE ACERAS, PLAZAS, VIAS PEATONALES, SEPARADORES, BERMAS, DEMARCACIONES DE CANALIZACION, ZONA VERDES O VIAS ESPECIALES PARA VEHICULOS NO MOTORIZADOS. EN EL CASO DE MOTOCICLETAS</option>
+                    <option value="D06">D06: ADELANTAR A OTRO VEHICULO EN BERMA, TUNEL, PUENTE, CURVA, PASOS A NIVEL Y CRUCES NO REGULADOS O AL APROXIMARSE A LA CIMA DE UNA CUESTA O DONDE LA SEÑAL DE TRANSITO CORRESPONDIENTE LO INDIQUE. EN EL CA</option>
+                    <option value="D07">D07: CONDUCIR REALIZANDO MANIOBRAS ALTAMENTE PELIGROSAS, SIEMPRE Y CUANDO LA MANIOBRA VIOLELAS NORMAS DE TRANSITO QUE PONGAN EN PELIGRO A LAS PERSONAS O LAS COSAS Y QUE CONSTITUYAN CONDUCTAS DOLOSAS O ALTA</option>
+                    <option value="D08">D08: CONDUCIR UN VEHICULO SIN LUCES O SIN LOS DISPOSITIVOS LUMINOSOS DE POSICION, DIRECCIONAES O DE FRENO, O CON ALGUNA DE ELLAS DAÑADA, EN LAS HORAS O CIRCUNSTANCIAS SEÑALADAS A CONTINUACION, ADEMAS, EL V</option>
+                    <option value="D09">D09: NO PERMITIR EL PASO DE LOS VEHICULOS DE EMERGENCIA, ESTO ES, AMBULANCIAS, VEHICULOS DE CUERPO DE BOMBEROS, VEHICULOS DE SOCORRO O EMERGENCIA Y DE LA POLICIA O EJERCITO. EL CONDUCTOR DEBE ORILLARSE AL</option>
+                    <option value="D10">D10: CONDUCIR UN VEHICULO PARA TRANSPORTE ESCOLAR CON EXCESO DE VELOCIDAD. EN LAS VIAS URBANAS, LA VELOCIDAD NO PODRA SER SUPERIOR A SESENTA (60) KILOMETROS POR HORA Y SIEMPRE Y CUANDO SE ENCUENTRE DEBIDAM</option>
+                    <option value="D11">D11: PERMITIR EL SERVICIO PUBLICO DE PASAJEROS QUE NO TENGA LA SALIDA DE EMERGENCIA EN CADA UNO DE SU CONSTADOS ADICIONALMENTE A LAS PUERTAS DE ASCESO DE PASAJEROS. EN ESTE CASO, LA MULTA SE IMPONDRA SOLID</option>
+                    <option value="D12">D12: CONDUCIR UN VEHICULO QUE, SIN LA DEBIDA AUTORIZACION, SE DESTINE A UN SERVICIO DIFERENTE DE AQUEL PARA EL CUAL TIENE LICENCIA DE TRANSITO. ADEMAS, EL VEHICULO SERA INMOVILIZADO POR PRIMERA VEZ, POR EL</option>
+                    <option value="D13">D13: EN CASO DE TRANSPORTAR CARGA CON PESO SUPERIOR AL AUTORIZADO EL VEHICULO SERA INMOVILIZADO Y EL EXCESO DEBERA SER TRANSBORDADO.</option>
+                    <option value="D14">D14: LAS AUTORIDADES DE TRANSITO ORDENARAN LA INMOVILIZACION INMEDIATA DE LOS VEHICULOS QUE USEN PARA SU MOVILIZACION COMBUSTIBLES NO REGULADOS COMO GAS PROPANO Y OTROS QUE PONGAN EN PELIGRO LA VIA DE LOS</option>
+                    <option value="D15">D15: CAMBIO DEL RECORRIDO O TRAZADO DE LA RUTA PARA EL VEHICULO DE SERVICIO DE TRANSPORTE PUBLICO DE PASAJEROS, AUTORIZADO POR EL ORGANISMO DE TRANSITO CORRESPONDIENTE. EN ESTE CASO, LA MULTA SE IMPONDRA S</option>
+                    <option value="D16">D16: ARROJAR RESIDUOS SOLIDOS AL ESPACIO PUBLICO DESDE UN VEHICULO AUTOMOTOR O DE TRACCION ANIMAL O HUMANA, ESTACIONADO O EN MOVIMIENTO.</option>
+                    <option value="E01">E01: PROVEER COMBUSTIBLE A VEHICULOS DE SERVICIO PUBLICO CON PASAJEROS A BORDO</option>
+                    <option value="E02">E02: NEGARSE A PRETAR EL SERVICIO PUBLICO SIN CAUSA JUSTIFICADA, SIEMPRE QUE DICHA NEGATIVA CAUSE ALTERACION DEL ORDEN PUBLICO</option>
+                    <option value="E04">E04: TRANSPORTAR EN EL MISMO VEHICULO Y AL MISMO TIEMPO PERSONAS Y SUSTANCIAS PELIGROSAS COMO EXPLOSIVOS, TOXICOS, RADIACTIVOS, COMBUSTIBLES NO AUTORIZADOS, ETC. EN ESTOS CASOS SE SUSPENDERA LA LICENCIA PO</option>
+                    <option value="F">F: CONDUCIR EN ESTADO DE EMBRIAGUEZ O BAJO LOS EFECTOS DE SUSTANCIAS ALUCINOGENAS, SE ATENDERA A LO ESTABLECIDO EN EL ARTICULO 152 DE ESTE CODIGO. SI SE TRATA DE CONDUCTORES DE VEHICULOS DE SERVICIOS PUB</option>
+                    <option value="F01">F01: INVADIR LA ZONA DESTINADA AL TRANSITO DE VEHICULOS, TRANSITAR EN ESTA EN PATINES, MONOPATINES, PATINETAS O SIMILARES.</option>
+                    <option value="F02">F02: LLEVAR, SIN LAS DEBIDAS PRECAUCIONES, ELEMENTOS QUE PUEDAN OBSTACULIZAR O AFECTAR EL TRANSITO.</option>
+                    <option value="F03">F03: CRUZAR POR SITIOS NO PERMITIDOS O TRANSITAR SOBRE EL GUARDAVIAS DEL FERROCARRIL.</option>
+                    <option value="F04">F04: COLOCARSE DELANTE O DETRAS DE UN VEHICULO QUE TENGA EL MOTOR ENCENDIDO.</option>
+                    <option value="F05">F05: REMOLCARSE DE VEHICULOS EN MOVIMIENTO.</option>
+                    <option value="F06">F06: ACTUAR DE MANERA QUE PONGA EN PELIGRO SU INTEGRIDAD FISICA</option>
+                    <option value="F07">F07: CRUZAR LA VIA ATRAVESANDO EL TRAFICO VEHICULAR EN LUGARES EN DONDE EXISTEN PASOS PEATONALES.</option>
+                    <option value="F08">F08: OCUPAR LA ZONA DE SEGURIDAD Y PROTECCION DE LA VIA FERREA, LA CUAL SE ESTABLECE A UNA DISTANCIA NO MENOR DE DOCE (12) METROS A LADO Y LADO DEL EJE DE LA VIA FERREA.</option>
+                    <option value="F09">F09: SUBIRSE O BAJARSE DE LOS VEHICULOS, ESTANDO ESTOS EN MOVIMIENTO, CUALQUIERA QUE SEA LA OPERACION O MANIOBRA QUE ESTEN REALIZANDO.</option>
+                    <option value="F10">F10: TRANSITAR POR LOS TUNELES, PUENTES Y VIADUCTOS DE LAS VIAS FERREAS.</option>
+                    <option value="F11">F11: EN RELACION CON EL STTMP, ESTOS NO DEBEN OCUPAR LA ZONA DE SEGURIDAD Y CORREDORES DE TRANSITO DE LOS VEHICULOS DEL STTMP, FUERA DE LOS LUGARES EXPRESAMENTE AUTORIZADOS Y HABILITADOS PARA ELLO.</option>
+                    <option value="F12">F12: DENTRO DEL PERIMETRO URBANO, EL CRUCE DEBE HACERSE SOLO POR LAS ZONAS AUTORIZADAS, COMO LOS PUENTES PEATONALES, LOS PASOS PEATONALES Y LAS BOCACALLES.</option>
+                    <option value="G01">G01: EL PASAJERO QUE SEA SORPRENDIDO FUMANDO EN UN VEHICULO DE SERVICIO PUBLICO, SERA OBLIGADO A ABANDONAR EL AUTOMOTOR Y DEBERA ASISTIR A UN CURSO DE SEGURIDAD VIAL.</option>
+                    <option value="G02">G02: LOS PEATONES Y CICLISTAS QUE NO CUMPLAN CON LAS DISPOSICIONES DE ESTE CODIGO, SERAN AMONESTADOS POR LA AUTORIDAD DE TRANSITO COMPETENTE Y DEBERAN ASISTIR A UN CURSO FORMATIVO DICTADO POR LAS AUTORIDAD</option>
+                    <option value="H01">H01: CIRCULAR PORTANDO DEFENSAS RIGIDAS DIFERENTES DE LAS INSTALADAS ORIGINALMENTE POR EL FABRICANTE. ADEMAS EL VEHICULO SERA INMOVILIZADO PREVENTIVAMENTE HASTA QUE SEAN RETIRADAS.</option>
+                    <option value="H02">H02: EL CONDUCTOR QUE NO PORTE LA LICENCIA DE TRANSITO, ADEMAS EL VEHICULO SERA INMOVILIZADO</option>
+                    <option value="H03">H03: EL CONDUCTOR, PASAJERO O PEATON, QUE OBSTACULICE, PERJUDIQUE O PONGA EN RIESGO A LAS DEMAS PERSONAS O QUE NO CUMPLA LAS NORMAS Y SEÑALES DE TRANSITO QUE LE SEAN APLICABLES O NO OBEDEZCA LAS INDICACION</option>
+                    <option value="H04">H04: EL CONDUCTOR QUE NO RESPETE LOS DERECHOS E INTEGRIDAD DE LOS PEATONES</option>
+                    <option value="H05">H05: EL CONDUCTOR QUE NO RESPETE LA PRELACION DE PASO EN INTERSECCIONES O GIROS O SEGUN LA CLASIFICACION DE LAS VIAS</option>
+                    <option value="H06">H06: EL CONDUCTOR QUE NO TOME LAS MEDIDAS NECESARIAS PARA EVITAR EL MOVIMIENTO DEL VEHICULO ESTACIONADO. EN VEHICULO DE TRACCION ANIMAL NO BLOQUEAR LAS RUEDAS PARA EVITAR SU MOVIMIENTO</option>
+                    <option value="H07">H07: EL CONDUCTOR QUE LLEVE PASAJEROS EN LA PARTE EXTERIOR DEL VEHICULO, FUERA DE LA CABINA O EN LOS ESTRIBOS DE LOS MISMOS. ADEMAS EL VEHICULO SERA INMOVILIZADO PREVENTIVAMENTE HASTA QUE SE SUBSANE DICHA</option>
+                    <option value="H08">H08: EL CONDUCTOR QUE PORTE LUCES EXPLORADORAS EN LA PARTE POSTERIOR DEL VEHICULO. ADEMAS EL VEHICULO SERA INMOVILIZADO PREVENTIVAMENTE HASTA QUE SEAN RETIRADAS</option>
+                    <option value="H09">H09: EL PASAJERO QUE PROFIERA EXPRESIONES INJRIOSAS O GROSERAS, PROMUEVA RIÑAS O CAUSE CUALQUIER MOLESTIA A LOS DEMAS PASAJEROS, ADEMAS LA ORDEN DE ABANDONAR EL VEHICULO, SIN PERJUICIO DE LAS SANCIONES A Q</option>
+                    <option value="H10">H10: LOS CONDUCTORES DE VEHICULOS NO AUTOMOTORES QUE INCURRAN EN LAS SIGUIENTES INFRACCIONES: A) TRANSITAR A UNA DISTANCIA MAYOR DE UN (1) METRO DE LA ACERA U ORILLA O UTILIZAR LAS VIAS EXCLUSIVAS PARA SER</option>
+                    <option value="H11">H11: VIAJAR LOS MENORES DE DOS (2) AÑOS SOLOS EN EL ASIENTO POSTERIOR SIN HACER USO DE UNA SILLA QUE GARANTICE SU SEGURIDAD Y QUE PERMITA SU FIJACION A EL, SIEMPRE Y CUANDO EL MENOR VIAJE UNICAMENTE EN COM</option>
+                    <option value="H12">H12: TRANSITAR EN VEHICULOS DE ALTO TONELAJE POR LAS VIAS DE SITIOS QUE ESTEN DECLARADOS O SE DECLAREN COMO MONUMENTOS DE CONSERVACION HISTORICA</option>
+                    <option value="H13">H13: LAS DEMAS CONDUCTAS QUE CONSTITUYAN INFRACCION A LAS NORMAS DE TRANSITO Y QUE NO SE ENCUENTREN DESCRITAS EN ESTE ACTO ADMINISTRATIVO</option>
+                    <option value="I01">I01: EL CONDUCTOR QUE SEA SORPRENDIDO FUMANDO MIENTRAS CONDUCE, DARA LUGAR A LA IMPOSICION DE DIEZ (10) SALARIOS MINIMOS LEGALES DIARIOS VIGENTES. SI SE TRATARE DE UN CONDUCTOR DE SERVICIO PUBLICO, ADEMAS</option>
+                    <!-- Agrega más opciones según sea necesario -->
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Generar Mapa</button>
+        </form>
+        <div id="map-container" class="mt-4">
+            <div id="map" style="height: 600px;"></div>
+        </div>
+        <div id="error-message" class="mt-2 text-danger"></div>
+    </div>
+
+    <script>
+        // Validación del formulario
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+
+        document.getElementById('form').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            // Limpiar errores anteriores
+            document.getElementById('error-message').innerHTML = "";
+            
+            // Limpiar el mapa y el contenedor del mapa
+            const mapContainer = document.getElementById('map');
+            mapContainer.innerHTML = "";
+
+            // Limpiar el contenedor del mapa y crear uno nuevo
+            const mapContainerDiv = document.getElementById('map-container');
+            mapContainerDiv.innerHTML = '<div id="map" style="height: 600px;"></div>';
+
+            const fileInput = document.getElementById('file');
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            const infraccion = document.getElementById('infraccion').value;
+
+            if (fileInput.files.length === 0) {
+                document.getElementById('error-message').innerHTML = 'Por favor, selecciona un archivo.';
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const lines = text.split('\n');
+                const expectedColumns = 60;
+
+                // Lista de nombres de columnas
+                const columnNames = [
+                    'COMCONSECUTIVO', 'COMNUMERO', 'COMFECHA', 'COMHORA', 'COMDIR', 'COMDIVIPOMUNI',
+                    'COMLOCALIDADCOMUNA', 'COMPLACA', 'COMDIVIPOMATRI', 'COMTIPOVEHI', 'COMTIPOSER', 'COMCODIGORADIO',
+                    'COMCODIGOMODALIDAD', 'COMCODIGOPASAJEROS', 'COMINFRACTOR', 'COMTIPODOC', 'COMNOMBE', 'COMAPELLIDO',
+                    'COMEDADINFRACTOR', 'COMDIRINFRACTOR', 'COMEMAIL', 'COMTELEINFRACTOR', 'COMIDCIUDAD', 'COMLICENCIA',
+                    'COMCATEGORIA', 'COMSECREEXPIDE', 'COMFECHAVENCE', 'COMTIPOINFRAC', 'COMPLICTRANSITO', 'COMDIVIPOLICEN',
+                    'COMIDENTIFICACION', 'COMIDTIPODOCPROP', 'COMNOMBREPROP', 'COMNOMBREEMPRESA', 'COMNITEMPRESA',
+                    'COMTARJETAOPERACION', 'COMPPLACAAGENTE', 'COMOBSERVA', 'COMFUGA', 'COMACCI', 'COMINMOV', 'COMPATIOINMOVILIZA',
+                    'COMDIRPATIOINMOVI', 'COMGRUANUMERO', 'COMPLACAGRUA', 'COMCONSECUTIINMOVI', 'COMIDENTIFICACIONTEST',
+                    'COMNOMBRETESTI', 'COMDIRECRESTESTI', 'COMTELETESTIGO', 'COMVALOR', 'COMVALAD', 'COMORGANISMO', 'COMESTADOCOM',
+                    'COMPOLCA', 'COMINFRACCION', 'COMVALINFRA', 'FUENTE COMPARENDO', 'LATITUD COMPARENDO', 'LONGITUD COMPARENDO'
+                ];
+
+                let correctRows = [];
+                let incorrectRows = [];
+                lines.forEach((line, index) => {
+                    const columns = line.split(',');
+                    if (columns.length === expectedColumns) {
+                        correctRows.push(line);
+                    } else {
+                        incorrectRows.push(line);
+                        console.log(`La fila ${index + 1} tiene ${columns.length} columnas en lugar de ${expectedColumns}.`);
+                    }
+                });
+
+                // Agregar encabezados a las filas correctas
+                correctRows.unshift(columnNames.join(','));
+
+                // Procesar las filas correctas
+                const correctData = correctRows.join('\n');
+                Papa.parse(correctData, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        const data = results.data;
+
+                        // Filtrar los datos por rango de fechas e infracción
+                        const filteredData = data.filter(row => {
+                            const dateParts = row['COMFECHA'].split('/');
+                            if (dateParts.length !== 3) return false;
+                            const date = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
+                            const dateInRange = date >= new Date(startDate) && date <= new Date(endDate);
+                            const infraccionMatch = infraccion ? row['COMINFRACCION'] === infraccion : true;
+                            return dateInRange && infraccionMatch;
+                        });
+
+                        if (filteredData.length === 0) {
+                            document.getElementById('error-message').innerHTML = 'No hay datos en el rango de fechas seleccionado y/o con el código de infracción seleccionado.';
+                            return;
+                        }
+
+                        // Crear un nuevo mapa
+                        const map = L.map('map').setView([6.346123, -75.507753], 14);
+
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        }).addTo(map);
+
+                        // Añadir marcadores al mapa
+                        filteredData.forEach(row => {
+                            const lat = parseFloat(row['LATITUD COMPARENDO']);
+                            const lon = parseFloat(row['LONGITUD COMPARENDO']);
+                            if (!isNaN(lat) && !isNaN(lon)) {
+                                L.marker([lat, lon]).addTo(map)
+                                    .bindPopup(`Fecha: ${row['COMFECHA']}<br>Número: ${row['COMNUMERO']}<br>Infracción: ${row['COMINFRACCION']}`);
+                            }
+                        });
+                    },
+                    error: function(error) {
+                        document.getElementById('error-message').innerHTML = 'Error al procesar el archivo: ' + error.message;
+                    }
+                });
+
+                // Resetear el formulario
+                // document.getElementById('form').reset();
+                document.getElementById('form').classList.remove('was-validated');
+            };
+
+            reader.readAsText(file);
+        });
+    </script>
+</body>
+</html>
